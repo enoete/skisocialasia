@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>East Asia Adventure!</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #E63946;
+  --gold: #FFB703;
+  --teal: #2EC4B6;
+  --dark: #1D1D2E;
+  --purple: #7B2D8B;
+  --green: #2DC653;
+  --orange: #FB8500;
+  --sky: #219EBC;
+  --pink: #FF6B9D;
+  --cream: #FFF8F0;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--dark);
+  color: white;
+  overflow-x: hidden;
+}
+
+/* ===================== STARS BG ===================== */
+.stars-bg {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at top, #0F0F3D 0%, #05050F 100%);
+  z-index: -2;
+}
+.star {
+  position: fixed;
+  width: 2px; height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle var(--dur) ease-in-out infinite;
+  opacity: var(--op);
+}
+@keyframes twinkle {
+  0%,100% { opacity: var(--op); transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* ===================== SPLASH SCREEN ===================== */
+#splash {
+  position: fixed; inset: 0;
+  z-index: 1000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1A1A4E 0%, #0D0D1A 100%);
+  text-align: center;
+  padding: 24px;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+#splash.out { opacity: 0; transform: scale(1.05); pointer-events: none; }
+
+.splash-emoji {
+  font-size: 100px;
+  animation: floatBig 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(255,183,3,0.6));
+  margin-bottom: 20px;
+}
+@keyframes floatBig {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+}
+.splash-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(36px, 8vw, 72px);
+  background: linear-gradient(135deg, #FFB703, #FF6B9D, #2EC4B6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+}
+.splash-sub {
+  font-size: clamp(14px, 3vw, 20px);
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 32px;
+  max-width: 500px;
+}
+.guide-intro {
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,183,3,0.4);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 32px;
+  max-width: 480px;
+  display: flex; gap: 16px; align-items: center;
+  text-align: left;
+}
+.guide-face { font-size: 56px; flex-shrink: 0; animation: wobble 2s ease-in-out infinite; }
+@keyframes wobble {
+  0%,100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+.guide-intro p { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.9); }
+.guide-intro strong { color: var(--gold); }
+.start-btn {
+  background: linear-gradient(135deg, #FFB703, #FB8500);
+  color: var(--dark);
+  border: none;
+  padding: 18px 48px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 24px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 8px 30px rgba(255,183,3,0.5);
+  letter-spacing: 0.5px;
+}
+.start-btn:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 14px 40px rgba(255,183,3,0.7); }
+.start-btn:active { transform: scale(0.97); }
+
+/* ===================== WORLD MAP NAV ===================== */
+#world-map {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 60px;
+  position: relative;
+}
+.map-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.map-header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 6vw, 52px);
+  background: linear-gradient(135deg, #FFB703, #2EC4B6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.map-header p { color: rgba(255,255,255,0.6); font-size: 16px; }
+
+.progress-bar-wrap {
+  width: 100%; max-width: 600px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50px;
+  height: 12px;
+  margin: 0 auto 48px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--teal), var(--gold));
+  border-radius: 50px;
+  transition: width 0.6s ease;
+  width: 0%;
+}
+
+.locations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 900px;
+  width: 100%;
+}
+
+.location-card {
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.location-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--card-color);
+  opacity: 0;
+  transition: opacity 0.25s;
+  border-radius: 18px;
+}
+.location-card:hover::before { opacity: 0.12; }
+.location-card:hover {
+  border-color: var(--card-color);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 20px var(--card-glow);
+}
+.location-card.locked { opacity: 0.45; cursor: not-allowed; }
+.location-card.locked:hover { transform: none; box-shadow: none; }
+.location-card.completed { border-color: var(--green); }
+.location-card.completed::after {
+  content: '✅';
+  position: absolute; top: 10px; right: 14px;
+  font-size: 22px;
+}
+.loc-emoji { font-size: 60px; margin-bottom: 12px; display: block;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+  animation: floatCard 3s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes floatCard {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.loc-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  margin-bottom: 6px;
+  color: white;
+}
+.loc-desc { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+.lock-icon { font-size: 28px; position: absolute; top: 10px; right: 14px; }
+
+/* ===================== GUIDE POPUP ===================== */
+.guide-popup {
+  position: fixed;
+  bottom: 24px; left: 24px;
+  background: rgba(15,15,60,0.95);
+  border: 2px solid var(--gold);
+  border-radius: 20px;
+  padding: 16px 20px;
+  max-width: 320px;
+  z-index: 500;
+  display: flex; gap: 12px; align-items: flex-start;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: slideUp 0.4s ease;
+  display: none;
+}
+.guide-popup.show { display: flex; }
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.guide-popup .gp-face { font-size: 40px; flex-shrink: 0; }
+.guide-popup .gp-text { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.9); }
+.guide-popup .gp-name { font-weight: 800; color: var(--gold); font-size: 13px; margin-bottom: 3px; }
+.gp-close {
+  position: absolute; top: 8px; right: 12px;
+  background: none; border: none; color: rgba(255,255,255,0.4);
+  font-size: 18px; cursor: pointer;
+}
+
+/* ===================== ADVENTURE ROOM ===================== */
+.adventure-room {
+  position: fixed; inset: 0;
+  z-index: 200;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.adventure-room.open {
+  opacity: 1; transform: scale(1); pointer-events: all;
+}
+
+.room-bg {
+  position: absolute; inset: 0;
+  background: var(--room-bg);
+  z-index: 0;
+}
+.room-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--room-overlay);
+  opacity: 0.6;
+}
+
+.room-header {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.room-back-btn {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.25);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px; font-weight: 700;
+  transition: all 0.2s;
+}
+.room-back-btn:hover { background: rgba(255,255,255,0.2); }
+.room-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(18px, 4vw, 28px);
+  text-align: center;
+}
+.room-xp {
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  color: var(--dark);
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* Room content scrollable area */
+.room-body {
+  position: relative; z-index: 2;
+  flex: 1; overflow-y: auto;
+  padding: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+/* Scene card - story/info delivery */
+.scene-card {
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 24px;
+  padding: 28px;
+  max-width: 780px;
+  margin: 0 auto 28px;
+}
+.scene-card h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(22px, 4vw, 34px);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.scene-card p { font-size: 16px; line-height: 1.8; color: rgba(255,255,255,0.9); margin-bottom: 14px; }
+.scene-card p:last-child { margin-bottom: 0; }
+
+/* Character speech bubble */
+.speech-row {
+  display: flex; gap: 16px; align-items: flex-start;
+  margin-bottom: 20px;
+  max-width: 780px; margin-left: auto; margin-right: auto;
+}
+.speech-row.flip { flex-direction: row-reverse; }
+.char-avatar { font-size: 56px; flex-shrink: 0; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+.speech-bubble {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 16px 20px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: white;
+  position: relative;
+  flex: 1;
+}
+.char-name {
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--gold);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.speech-bubble.highlight { border-color: var(--gold); background: rgba(255,183,3,0.12); }
+.speech-bubble.info { border-color: var(--teal); background: rgba(46,196,182,0.1); }
+.speech-bubble.fun { border-color: var(--pink); background: rgba(255,107,157,0.1); }
+
+/* Fact cards inside rooms */
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  max-width: 780px;
+  margin: 0 auto 24px;
+}
+.fact-tile {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: default;
+}
+.fact-tile:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.fact-tile .ft-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+.fact-tile .ft-title { font-weight: 800; font-size: 14px; color: var(--gold); margin-bottom: 6px; }
+.fact-tile .ft-body { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.5; }
+
+/* Mini quiz inside room */
+.mini-quiz {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px);
+  border: 2px solid var(--gold);
+  border-radius: 24px;
+  padding: 28px;
+  max-width: 780px;
+  margin: 0 auto 24px;
+}
+.mini-quiz h3 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: var(--gold);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.mq-question { margin-bottom: 24px; }
+.mq-q-text {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mq-options { display: flex; flex-direction: column; gap: 10px; }
+.mq-opt {
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  padding: 13px 18px;
+  font-size: 15px;
+  font-family: 'Nunito', sans-serif;
+  color: white;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 600;
+}
+.mq-opt:hover:not(:disabled) { background: rgba(255,255,255,0.15); border-color: white; transform: translateX(6px); }
+.mq-opt .opt-icon { font-size: 20px; }
+.mq-opt.correct { background: rgba(45,198,83,0.25); border-color: var(--green); }
+.mq-opt.wrong { background: rgba(230,57,70,0.25); border-color: var(--red); }
+.mq-opt:disabled { cursor: default; }
+
+/* TF button */
+.tf-row { display: flex; gap: 12px; }
+.mq-tf {
+  flex:1; padding: 16px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mq-tf:hover:not(:disabled) { transform: scale(1.04); }
+.mq-tf.correct { background: rgba(45,198,83,0.3); border-color: var(--green); }
+.mq-tf.wrong { background: rgba(230,57,70,0.3); border-color: var(--red); }
+.mq-tf:disabled { cursor: default; }
+
+/* Fill blank */
+.fill-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mq-fill {
+  flex: 1; min-width: 160px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-family: 'Nunito', sans-serif;
+  color: white;
+  outline: none;
+}
+.mq-fill::placeholder { color: rgba(255,255,255,0.3); }
+.mq-fill:focus { border-color: var(--teal); }
+.mq-fill.correct { border-color: var(--green); background: rgba(45,198,83,0.15); }
+.mq-fill.wrong { border-color: var(--red); background: rgba(230,57,70,0.15); }
+.mq-submit {
+  background: var(--teal);
+  border: none;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mq-submit:hover { background: #20A8A0; transform: scale(1.04); }
+.mq-submit:disabled { opacity: 0.5; cursor: default; }
+
+/* Feedback row */
+.q-feedback {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  display: none;
+}
+.q-feedback.show { display: block; }
+.q-feedback.ok { background: rgba(45,198,83,0.2); border: 1px solid var(--green); }
+.q-feedback.no { background: rgba(230,57,70,0.2); border: 1px solid var(--red); }
+
+/* Section complete banner */
+.section-complete {
+  display: none;
+  text-align: center;
+  padding: 32px;
+  max-width: 780px;
+  margin: 0 auto;
+}
+.section-complete.show { display: block; }
+.complete-circle {
+  width: 120px; height: 120px;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  border-radius: 50%;
+  font-size: 56px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 0 40px rgba(255,183,3,0.6);
+}
+@keyframes pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+.section-complete h2 { font-family: 'Fredoka One', cursive; font-size: 32px; color: var(--gold); margin-bottom: 10px; }
+.section-complete p { color: rgba(255,255,255,0.7); font-size: 16px; margin-bottom: 24px; }
+.go-map-btn {
+  background: linear-gradient(135deg, var(--teal), var(--sky));
+  border: none;
+  color: white;
+  padding: 16px 40px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 8px 24px rgba(46,196,182,0.4);
+}
+.go-map-btn:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(46,196,182,0.6); }
+
+/* ===================== FINAL BOSS QUIZ ===================== */
+#boss-quiz {
+  position: fixed; inset: 0;
+  z-index: 300;
+  display: flex; flex-direction: column;
+  background: linear-gradient(135deg, #0A0A2E, #1A0A2E);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+#boss-quiz.open { opacity: 1; pointer-events: all; }
+
+.boss-header {
+  padding: 16px 24px;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,183,3,0.3);
+  flex-wrap: wrap; gap: 10px;
+}
+.boss-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(18px, 4vw, 28px);
+  background: linear-gradient(135deg, var(--gold), var(--red));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.boss-progress {
+  display: flex; align-items: center; gap: 10px;
+}
+.boss-hearts { font-size: 22px; letter-spacing: 2px; }
+.boss-qnum { font-size: 14px; color: rgba(255,255,255,0.6); font-weight: 700; }
+
+.boss-body {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+}
+
+/* Dragon boss character */
+.boss-dragon {
+  font-size: 90px;
+  animation: dragonFloat 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(230,57,70,0.7));
+  margin-bottom: 8px;
+}
+@keyframes dragonFloat {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-12px) scale(1.05); }
+}
+.boss-dragon.hurt {
+  animation: shake 0.4s ease;
+  filter: drop-shadow(0 0 30px rgba(255,183,3,0.9));
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-10px) rotate(-5deg); }
+  40% { transform: translateX(10px) rotate(5deg); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+.boss-hp-bar {
+  width: 300px; max-width: 100%;
+  height: 18px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 32px;
+  border: 1px solid rgba(230,57,70,0.4);
+}
+.boss-hp-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--red), var(--gold));
+  border-radius: 50px;
+  transition: width 0.5s ease;
+}
+
+.boss-question {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 24px 28px;
+  width: 100%; max-width: 660px;
+  margin-bottom: 20px;
+}
+.boss-q-type {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.boss-q-text {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
+  margin-bottom: 20px;
+  color: white;
+}
+.boss-opts { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 660px; }
+.boss-opt {
+  background: rgba(255,255,255,0.07);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: white;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+  display: flex; gap: 12px; align-items: center;
+}
+.boss-opt:hover:not(:disabled) {
+  background: rgba(255,255,255,0.14);
+  border-color: var(--gold);
+  transform: translateX(8px);
+}
+.boss-opt.correct { background: rgba(45,198,83,0.25); border-color: var(--green); }
+.boss-opt.wrong { background: rgba(230,57,70,0.25); border-color: var(--red); }
+.boss-opt:disabled { cursor: default; }
+.boss-opt-letter {
+  background: rgba(255,255,255,0.1);
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.boss-tf-row { display: flex; gap: 14px; width: 100%; max-width: 660px; }
+.boss-tf {
+  flex: 1; padding: 18px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.07);
+  color: white; cursor: pointer;
+  transition: all 0.2s;
+}
+.boss-tf:hover:not(:disabled) { transform: scale(1.04); }
+.boss-tf.correct { background: rgba(45,198,83,0.3); border-color: var(--green); }
+.boss-tf.wrong { background: rgba(230,57,70,0.3); border-color: var(--red); }
+.boss-fill-row { display: flex; gap: 10px; width: 100%; max-width: 660px; flex-wrap: wrap; }
+.boss-fill {
+  flex:1; min-width: 160px;
+  background: rgba(255,255,255,0.07);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 16px; font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  color: white; outline: none;
+}
+.boss-fill::placeholder { color: rgba(255,255,255,0.3); }
+.boss-fill:focus { border-color: var(--gold); }
+.boss-fill.correct { border-color: var(--green); background: rgba(45,198,83,0.15); }
+.boss-fill.wrong { border-color: var(--red); }
+.boss-submit {
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  border: none; color: var(--dark);
+  padding: 14px 28px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  border-radius: 12px; cursor: pointer;
+  transition: all 0.2s;
+}
+.boss-submit:hover { transform: scale(1.05); }
+.boss-submit:disabled { opacity: 0.5; cursor: default; }
+.boss-feedback {
+  width: 100%; max-width: 660px;
+  margin-top: 14px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  font-size: 14px; line-height: 1.6;
+  display: none;
+}
+.boss-feedback.show { display: block; }
+.boss-feedback.ok { background: rgba(45,198,83,0.2); border: 1px solid var(--green); }
+.boss-feedback.no { background: rgba(230,57,70,0.2); border: 1px solid var(--red); }
+.boss-next-btn {
+  margin-top: 18px;
+  background: linear-gradient(135deg, var(--purple), var(--sky));
+  border: none; color: white;
+  padding: 14px 36px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  border-radius: 50px; cursor: pointer;
+  transition: all 0.2s;
+  display: none;
+  box-shadow: 0 6px 20px rgba(123,45,139,0.5);
+}
+.boss-next-btn:hover { transform: translateY(-4px); }
+.boss-next-btn.show { display: block; }
+
+/* Boss results */
+.boss-results {
+  display: none;
+  text-align: center;
+  padding: 20px;
+  flex-direction: column;
+  align-items: center;
+}
+.boss-results.show { display: flex; }
+.trophy { font-size: 100px; animation: floatBig 2.5s ease-in-out infinite; margin-bottom: 20px; }
+.boss-results h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 6vw, 52px);
+  background: linear-gradient(135deg, var(--gold), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.boss-results .score-big {
+  font-family: 'Fredoka One', cursive;
+  font-size: 72px;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(255,183,3,0.7);
+  margin-bottom: 8px;
+}
+.boss-results .grade-msg { font-size: 20px; color: rgba(255,255,255,0.75); margin-bottom: 30px; }
+.retry-boss {
+  background: linear-gradient(135deg, var(--red), var(--orange));
+  border: none; color: white;
+  padding: 16px 44px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  border-radius: 50px; cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 8px 28px rgba(230,57,70,0.5);
+}
+.retry-boss:hover { transform: translateY(-4px); }
+
+/* ===================== XP TOAST ===================== */
+.xp-toast {
+  position: fixed; top: 80px; right: 20px;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  color: var(--dark);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: toastAnim 1.8s ease forwards;
+}
+@keyframes toastAnim {
+  0% { opacity:0; transform: translateX(30px) scale(0.8); }
+  20% { opacity:1; transform: translateX(0) scale(1); }
+  70% { opacity:1; transform: translateX(0) scale(1); }
+  100% { opacity:0; transform: translateY(-20px) scale(0.9); }
+}
+
+/* ===================== CONFETTI ===================== */
+.confetti-piece {
+  position: fixed;
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9998;
+  animation: confettiFall var(--dur) ease forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .speech-row { flex-direction: column; }
+  .speech-row.flip { flex-direction: column; }
+  .char-avatar { font-size: 44px; }
+  .fact-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="stars-bg" id="stars-bg"></div>
+
+<!-- =========================================================
+     SPLASH
+========================================================= -->
+<div id="splash">
+  <div class="splash-emoji">🏯</div>
+  <div class="splash-title">East Asia<br>Adventure!</div>
+  <div class="splash-sub">A magical journey across China, Japan, Mongolia, Korea & Taiwan!</div>
+  <div class="guide-intro">
+    <div class="guide-face">🐉</div>
+    <p>Hi! I'm <strong>Long</strong>, the friendly dragon! I'll guide you across East Asia, teaching you amazing things about its countries, history, geography, and culture. Ready to explore?</p>
+  </div>
+  <button class="start-btn" onclick="startAdventure()">🗺️ Start the Adventure!</button>
+</div>
+
+<!-- =========================================================
+     WORLD MAP
+========================================================= -->
+<div id="world-map">
+  <div class="map-header">
+    <h1>🗺️ Your East Asia Adventure Map</h1>
+    <p>Explore each destination to unlock the Final Boss Quiz!</p>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="main-progress"></div>
+  </div>
+  <div class="locations-grid" id="locations-grid"></div>
+</div>
+
+<!-- =========================================================
+     GUIDE POPUP
+========================================================= -->
+<div class="guide-popup" id="guide-popup">
+  <button class="gp-close" onclick="closeGuide()">✕</button>
+  <div class="gp-face">🐉</div>
+  <div class="gp-text">
+    <div class="gp-name">Long the Dragon</div>
+    <span id="guide-msg">Welcome!</span>
+  </div>
+</div>
+
+<!-- =========================================================
+     ADVENTURE ROOMS (generated dynamically)
+========================================================= -->
+<div class="adventure-room" id="adventure-room">
+  <div class="room-bg" id="room-bg"></div>
+  <div class="room-header">
+    <button class="room-back-btn" onclick="closeRoom()">← Map</button>
+    <div class="room-title" id="room-title">Adventure</div>
+    <div class="room-xp" id="room-xp">⚡ 0 XP</div>
+  </div>
+  <div class="room-body" id="room-body"></div>
+</div>
+
+<!-- =========================================================
+     BOSS QUIZ
+========================================================= -->
+<div id="boss-quiz">
+  <div class="boss-header">
+    <div class="boss-title">🐲 Final Dragon Boss Quiz!</div>
+    <div class="boss-progress">
+      <span class="boss-hearts" id="boss-hearts">❤️❤️❤️</span>
+      <span class="boss-qnum" id="boss-qnum">Q 1 / 30</span>
+    </div>
+  </div>
+  <div class="boss-body" id="boss-body">
+    <div class="boss-dragon" id="boss-dragon">🐲</div>
+    <div class="boss-hp-bar"><div class="boss-hp-fill" id="boss-hp-fill"></div></div>
+    <div id="boss-question-area"></div>
+    <div class="boss-results" id="boss-results">
+      <div class="trophy" id="trophy-emoji">🏆</div>
+      <h2 id="boss-result-title">You Did It!</h2>
+      <div class="score-big" id="boss-score-big">0/30</div>
+      <div class="grade-msg" id="boss-grade-msg"></div>
+      <button class="retry-boss" onclick="initBossQuiz()">🔄 Fight Again!</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     JS
+========================================================= -->
+<script>
+// ============ STARS ============
+(function() {
+  const bg = document.getElementById('stars-bg');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;
+      --dur:${2 + Math.random()*4}s;--op:${0.2 + Math.random()*0.7};
+      width:${1 + Math.random()*2.5}px;height:${1 + Math.random()*2.5}px;`;
+    bg.appendChild(s);
+  }
+})();
+
+// ============ STATE ============
+let xp = 0;
+let completedLocations = new Set();
+let currentLocationId = null;
+
+// ============ LOCATIONS DATA ============
+const LOCATIONS = [
+  {
+    id: 'overview',
+    name: '🌏 The Dragon Gate',
+    emoji: '🗺️',
+    desc: 'Start here! Meet Long & learn the basics.',
+    color: '#2EC4B6', glow: 'rgba(46,196,182,0.5)',
+    bgGradient: 'linear-gradient(135deg, #0A3A4A 0%, #0D2233 100%)',
+    bgOverlay: 'radial-gradient(ellipse at center, rgba(46,196,182,0.15) 0%, transparent 70%)',
+    locked: false,
+    content: 'overview'
+  },
+  {
+    id: 'countries',
+    name: '🏛️ Kingdom Hall',
+    emoji: '🏯',
+    desc: 'Explore the 6 nations of East Asia!',
+    color: '#E63946', glow: 'rgba(230,57,70,0.5)',
+    bgGradient: 'linear-gradient(135deg, #3A0A0A 0%, #200505 100%)',
+    bgOverlay: 'radial-gradient(ellipse at center, rgba(230,57,70,0.15) 0%, transparent 70%)',
+    locked: false,
+    content: 'countries'
+  },
+  {
+    id: 'geography',
+    name: '⛰️ The Mountain Pass',
+    emoji: '🏔️',
+    desc: 'Rivers, deserts, islands & seas await!',
+    color: '#7B2D8B', glow: 'rgba(123,45,139,0.5)',
+    bgGradient: 'linear-gradient(135deg, #1A0A3A 0%, #0D0520 100%)',
+    bgOverlay: 'radial-gradient(ellipse at center, rgba(123,45,139,0.2) 0%, transparent 70%)',
+    locked: false,
+    content: 'geography'
+  },
+  {
+    id: 'history',
+    name: '📜 Temple of Time',
+    emoji: '⛩️',
+    desc: 'Dynasties, inventions & ancient wisdom!',
+    color: '#FFB703', glow: 'rgba(255,183,3,0.5)',
+    bgGradient: 'linear-gradient(135deg, #2A1A00 0%, #180E00 100%)',
+    bgOverlay: 'radial-gradient(ellipse at center, rgba(255,183,3,0.15) 0%, transparent 70%)',
+    locked: false,
+    content: 'history'
+  },
+  {
+    id: 'culture',
+    name: '🎎 Culture Village',
+    emoji: '🎋',
+    desc: 'Food, sports, arts & city life!',
+    color: '#FF6B9D', glow: 'rgba(255,107,157,0.5)',
+    bgGradient: 'linear-gradient(135deg, #2A0A1A 0%, #180510 100%)',
+    bgOverlay: 'radial-gradient(ellipse at center, rgba(255,107,157,0.15) 0%, transparent 70%)',
+    locked: false,
+    content: 'culture'
+  },
+  {
+    id: 'boss',
+    name: '🐲 Dragon Boss Lair',
+    emoji: '🐲',
+    desc: 'Complete all zones to unlock the FINAL QUIZ!',
+    color: '#FB8500', glow: 'rgba(251,133,0,0.5)',
+    bgGradient: 'linear-gradient(135deg, #2A0A00, #0A0000)',
+    bgOverlay: '',
+    locked: true,
+    content: 'boss'
+  }
+];
+
+// ============ CONTENT DATA ============
+const ROOM_CONTENT = {
+  overview: {
+    title: '🌏 Welcome to East Asia!',
+    scenes: [
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: 'ROARRR! Welcome, brave explorer! I am <strong>Long</strong>, the spirit dragon of East Asia! I\'ve been waiting for someone like you. This region is absolutely MASSIVE — over <strong>11.7 million square kilometres</strong> and home to <strong>1.6 billion people!</strong> That\'s almost 1 in every 5 humans on Earth living right here!', style: 'highlight' },
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: 'East Asia is made up of <strong>6 countries</strong>: China, Japan, Mongolia, North Korea, South Korea, and Taiwan. The region features jaw-dropping landscapes — towering Himalayas, vast deserts, mighty rivers, volcanic island chains, and bustling megacities!', style: 'info', flip: true },
+      { type: 'facts', items: [
+        { icon: '📏', title: 'Size', body: '11.7 million km² of land!' },
+        { icon: '👥', title: 'Population', body: '~1.6 billion people' },
+        { icon: '🏳️', title: 'Countries', body: '6 nations' },
+        { icon: '🌊', title: 'Coastline', body: 'Borders 4 major seas' },
+        { icon: '🏔️', title: 'Highest Point', body: 'Mount Everest in the Himalayas' },
+        { icon: '🏙️', title: 'Biggest City', body: 'Tokyo — 32 million people!' }
+      ]},
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: '🇨🇳 China is the GIANT of East Asia — it\'s the 3rd or 4th largest country in the WORLD! China\'s land is divided into three "steps" from high to low: The Plateau of Tibet (highest!), then mountains & plateaus, then the low plains where most people live and farm.', style: '' },
+      { type: 'quiz', questions: [
+        { q: '🌍 How many countries make up East Asia?', type: 'mc', opts: ['4 countries', '5 countries', '6 countries', '8 countries'], ans: 2, fb: 'The 6 countries are: China, Japan, Mongolia, North Korea, South Korea, and Taiwan! 🎉' },
+        { q: '🏙️ Which city is home to a whopping 32 million people?', type: 'mc', opts: ['Shanghai', 'Beijing', 'Seoul', 'Tokyo'], ans: 3, fb: 'Tokyo is a mega-city! It forms a MEGALOPOLIS together with Osaka, Nagoya, and Yokohama! 🌆' },
+        { q: 'True or False: East Asia covers more than 11 million square kilometres.', type: 'tf', ans: true, fb: 'TRUE! East Asia covers over 11.7 million km² — that\'s enormous! 🗺️' },
+        { q: 'China\'s "third step" of land elevation is mainly _____.', type: 'fill', ans: 'plains', hint: 'flat farmland', fb: 'Plains! The flat lowlands of China are where most people live and grow food. 🌾' }
+      ]}
+    ]
+  },
+
+  countries: {
+    title: '🏯 The 6 Kingdoms of East Asia',
+    scenes: [
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: 'Now let\'s meet the 6 kingdoms! Each one is unique and special. Some are on the mainland, some are islands, and one is a peninsula — that\'s a piece of land surrounded by water on three sides!', style: 'highlight' },
+      { type: 'facts', items: [
+        { icon: '🇨🇳', title: 'China → Beijing', body: 'Largest country in East Asia. 3rd/4th biggest in the world! Mainland.' },
+        { icon: '🇯🇵', title: 'Japan → Tokyo', body: 'Island nation — an archipelago of 4 main islands. 1,000+ earthquakes per year!' },
+        { icon: '🇲🇳', title: 'Mongolia → Ulaanbaatar', body: 'Landlocked country between China & Russia. Home of the Gobi Desert.' },
+        { icon: '🇰🇵', title: 'North Korea → Pyongyang', body: 'A peninsula country. Very secretive — State Atheism is official.' },
+        { icon: '🇰🇷', title: 'South Korea → Seoul', body: 'Peninsula country. Seoul has 10 million+ people. 83% urban!' },
+        { icon: '🇹🇼', title: 'Taiwan → Taipei', body: 'A de facto country — acts independent, but not officially recognized by many nations.' }
+      ]},
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: '🤔 Wait, what\'s a "de facto" country? It means Taiwan ACTS like its own country — it has its own government, military, money, and flag — but many other countries don\'t officially say it\'s independent because of China\'s position. It\'s complicated! 😅', style: 'fun', flip: true },
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: '🏝️ Japan is an <strong>ARCHIPELAGO</strong> — a chain of islands! Its 4 main islands are Hokkaido (north), Honshu (largest, where Tokyo is!), Shikoku, and Kyushu. These islands were formed by VOLCANIC eruptions millions of years ago. That\'s why Japan shakes so much — 1,000 earthquakes a year!', style: '' },
+      { type: 'quiz', questions: [
+        { q: '🇯🇵 What are Japan\'s 4 main islands?', type: 'mc', opts: ['Okinawa, Tokyo, Osaka, Kyoto', 'Hokkaido, Honshu, Shikoku, Kyushu', 'Hokkaido, Honshu, Osaka, Kyushu', 'Kyoto, Nagoya, Shikoku, Honshu'], ans: 1, fb: 'Hokkaido, Honshu, Shikoku, and Kyushu! All formed by volcanic activity! 🌋' },
+        { q: 'True or False: Taiwan is officially recognized as an independent country by most nations.', type: 'tf', ans: false, fb: 'FALSE! Taiwan is a "de facto" country — it acts independently but isn\'t officially recognized by many others due to its complex relationship with China. 🤯' },
+        { q: 'What is the capital city of Mongolia?', type: 'mc', opts: ['Beijing', 'Pyongyang', 'Ulaanbaatar', 'Taipei'], ans: 2, fb: 'Ulaanbaatar is the capital of Mongolia! It\'s one of the world\'s coldest capitals! 🥶' },
+        { q: 'South Korea\'s capital city is _____.', type: 'fill', ans: 'seoul', hint: 'Sounds like "soul"', fb: 'Seoul! With over 10 million people, it\'s a massive, modern city. 🏙️' }
+      ]}
+    ]
+  },
+
+  geography: {
+    title: '⛰️ Incredible Landforms & Waters',
+    scenes: [
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: 'Hold on tight — East Asia\'s geography will BLOW YOUR MIND! 🌋 We\'ve got the world\'s highest plateau, two enormous deserts, the world\'s longest mountains, volcanic islands, and rivers that fed entire civilizations! Let\'s go!', style: 'highlight' },
+      { type: 'facts', items: [
+        { icon: '🏔️', title: 'Plateau of Tibet', body: 'LARGEST & HIGHEST plateau on Earth! Located in western China.' },
+        { icon: '⛰️', title: 'Himalayas', body: 'World\'s tallest mountains — in SW China. Home of Mount Everest!' },
+        { icon: '🏜️', title: 'Gobi Desert', body: 'Massive desert in Mongolia & China. Hot summers, FREEZING winters!' },
+        { icon: '🏜️', title: 'Taklamakan Desert', body: 'One of the world\'s largest SANDY deserts. In NW China. "You go in, you don\'t come out!"' },
+        { icon: '🗻', title: 'Mount Fuji', body: 'Japan\'s most famous mountain. A beautiful volcano you can climb!' },
+        { icon: '🏔️', title: 'Kunlun Shan Mtns', body: 'One of Asia\'s longest mountain ranges, stretching across western China.' }
+      ]},
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: '🌊 East Asia has 4 major seas: the <strong>South China Sea</strong>, <strong>Yellow Sea</strong>, <strong>East China Sea</strong>, and the <strong>Sea of Japan</strong> (also called the East Sea). These waters are super important for fishing, trade, and even island territories!', style: 'info', flip: true },
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: '💧 Rivers are the LIFELINES of East Asia! The mighty <strong>Yangtze River</strong> is the longest in all of Asia. The <strong>Huang He (Yellow River)</strong> is nicknamed "Cradle of Chinese Civilization" — early Chinese people built their society along its banks! Japan\'s longest river is the <strong>Shinano</strong>, and the <strong>Tone River</strong> supplies water to Tokyo!', style: '' },
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: '🌡️ Climate here is WILD and varied! SE China = hot & rainy 🌧️. Northern China = cold winters, warm summers ❄️☀️. NW China & Mongolia = dry, cold, desert 🏜️. Japan, Taiwan & Korea = rainy and mild 🌦️. THREE factors control climate: <strong>latitude</strong> (how far north/south), <strong>elevation</strong> (how high up), and <strong>air masses</strong> (wind from the Pacific or from northern Asia).', style: 'fun', flip: true },
+      { type: 'quiz', questions: [
+        { q: '🏔️ Which plateau is the LARGEST and HIGHEST in the entire world?', type: 'mc', opts: ['The Gobi Plateau', 'The Plateau of Tibet', 'The Mongolian Steppe', 'The Kunlun Plateau'], ans: 1, fb: 'The Plateau of Tibet is the largest and highest plateau on Earth! It\'s so high, it\'s called "the roof of the world!" 🌍' },
+        { q: 'True or False: Japan experiences more than 1,000 small earthquakes per year.', type: 'tf', ans: true, fb: 'TRUE! Japan sits on the "Ring of Fire" — a zone of major tectonic activity. That\'s why tsunamis are also a real danger there! 🌊' },
+        { q: 'Which river is called the "Cradle of Chinese Civilization"?', type: 'mc', opts: ['Yangtze River', 'Tone River', 'Huang He (Yellow River)', 'Shinano River'], ans: 2, fb: 'The Huang He (Yellow River)! Early Chinese civilizations formed along its fertile banks thousands of years ago. 🏺' },
+        { q: 'The Yangtze River is the longest river in _____.', type: 'fill', ans: 'asia', hint: 'The whole continent!', fb: 'All of Asia! And it\'s the longest in China too. It stretches an incredible 6,300 km! 💧' }
+      ]}
+    ]
+  },
+
+  history: {
+    title: '📜 Dynasties, Inventions & Ancient Wisdom',
+    scenes: [
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: 'OH BOY. Chinese history is over 4,000 years old! I was there for some of it! 😄 For most of those years, mighty emperors and empresses ruled through DYNASTIES — that means a family line that holds power until someone kicks them out. Let me introduce you!', style: 'highlight' },
+      { type: 'facts', items: [
+        { icon: '🏛️', title: 'Xia Dynasty', body: '2200–1700 B.C. — China\'s first dynasty!' },
+        { icon: '⚔️', title: 'Shang Dynasty', body: '1766–1080 B.C. — Early Chinese writing began here!' },
+        { icon: '📜', title: 'Han Dynasty', body: '206 B.C.–A.D. 221 — Arts & science BOOMED! Silk Road trade! Paper invented! 🗺️' },
+        { icon: '🧱', title: 'Ming Dynasty', body: '1368–1644 — Great Wall massively expanded! Forbidden City built! 🏯' },
+        { icon: '👑', title: 'Qing Dynasty', body: '1644–1911 — Last imperial dynasty of China!' },
+        { icon: '⛩️', title: '11 Dynasties Total', body: 'From Xia to Qing — thousands of years of royal history!' }
+      ]},
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: '🧱 The GREAT WALL OF CHINA is the longest man-made structure in the WORLD at <strong>21,196 km</strong> (13,171 miles!). Construction started about 2,200 years ago to protect China from invasions from the north. It stretches from the Yellow Sea in the east to the desert in the west!', style: 'info', flip: true },
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: '🤔 And the BIG IDEAS! A thinker named <strong>Confucius</strong> said family was everything — rulers should lead like a parent leads their family. He founded <strong>Confucianism</strong>. Another wise man, <strong>Laozi</strong>, founded <strong>Daoism</strong> — live in harmony with nature! And <strong>Buddhism</strong> travelled from India into China and spread through the whole region! 🙏', style: '' },
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: '💡 THE FOUR GREAT CHINESE INVENTIONS changed the entire world! <strong>Papermaking</strong> (for records 📄), <strong>Printing</strong> (faster books 📚), <strong>Gunpowder</strong> (fireworks & explosives 💥), and the <strong>Magnetic Compass</strong> (helped sailors navigate 🧭). Without these, modern life would look VERY different!', style: 'highlight', flip: true },
+      { type: 'quiz', questions: [
+        { q: '🧱 How long is the Great Wall of China?', type: 'mc', opts: ['5,000 km', '10,000 km', '21,196 km', '30,000 km'], ans: 2, fb: '21,196 km — the longest man-made structure ever built! Construction began about 2,200 years ago! 🏗️' },
+        { q: 'True or False: Daoism was founded by Confucius.', type: 'tf', ans: false, fb: 'FALSE! Daoism was founded by Laozi, who taught living in harmony with nature. CONFUCIUS founded Confucianism, focused on family values! 📚' },
+        { q: '🧭 Which Chinese invention helped sailors find their direction at sea?', type: 'mc', opts: ['Printing press', 'Gunpowder', 'Papermaking', 'Magnetic compass'], ans: 3, fb: 'The Magnetic Compass! It revolutionized navigation and made long ocean voyages possible! ⛵' },
+        { q: 'Which Han dynasty trade route connected China to the Mediterranean?', type: 'fill', ans: 'silk road', hint: 'Named after China\'s most famous export', fb: 'The Silk Road! China sent silk, tea, spices, paper & porcelain west, and received wool, gold & silver in return! 🐫' }
+      ]}
+    ]
+  },
+
+  culture: {
+    title: '🎎 Life, Culture & Modern East Asia',
+    scenes: [
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: 'Now for my FAVORITE part — the people and their amazing cultures! From K-pop to taekwondo, anime to baseball, East Asia is a cultural EXPLOSION! 🎉 And the food... mmm, I love rice and noodles! 🍜', style: 'highlight' },
+      { type: 'facts', items: [
+        { icon: '🍚', title: 'Staple Foods', body: 'Rice & noodles are eaten daily across all 6 countries!' },
+        { icon: '⚾', title: 'Baseball!', body: 'American baseball is HUGE in Japan, Taiwan & South Korea!' },
+        { icon: '🏀', title: 'Basketball!', body: 'Basketball is the #1 sport in China — bigger than soccer!' },
+        { icon: '🥋', title: 'Martial Arts', body: 'Millions practice tai chi & taekwondo — traditional arts!' },
+        { icon: '🎵', title: 'K-Pop', body: 'South Korean pop music is a global phenomenon! 🎤' },
+        { icon: '🎌', title: 'Anime', body: 'Japan is the home of anime — a unique style of animation!' }
+      ]},
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: '🏙️ East Asian cities are MIND-BLOWINGLY massive! Nearly <strong>half of China\'s 1.4 billion people</strong> live in cities. <strong>83% of South Koreans</strong> are urban! Tokyo alone has <strong>32 million people</strong> — it\'s a MEGALOPOLIS with nearby Osaka, Nagoya & Yokohama! Seoul, South Korea has over 10 million. Shanghai is China\'s largest city!', style: 'info', flip: true },
+      { type: 'speech', char: '🐉', name: 'Long the Dragon', text: 'Each country has its own unique culture! Japan has <strong>Shinto & Buddhism</strong>. China has <strong>Buddhism, Daoism & Confucianism</strong>. Mongolia is mostly <strong>Buddhist</strong>. North Korea has official <strong>State Atheism</strong>. And education is KING everywhere — teachers are among the most respected people in East Asian societies! 📚', style: '' },
+      { type: 'speech', char: '🧙‍♀️', name: 'Scholar Lin', text: '⚠️ Modern challenges: Even though China & Japan have the world\'s 2nd and 3rd largest economies, East Asia faces big problems — <strong>air pollution</strong> from factories 💨, earthquake risks in Japan 🏚️, a growing <strong>income gap</strong> between rich cities and poor rural areas 💰, and political tensions between countries like North & South Korea! 🌏', style: 'fun', flip: true },
+      { type: 'quiz', questions: [
+        { q: '🎵 South Korean _____ music has become popular across the entire world!', type: 'fill', ans: 'k-pop', hint: 'Two letters hyphen three letters', fb: 'K-Pop! Groups like BTS and BLACKPINK have made South Korean pop music a massive global force! 🎤🌍' },
+        { q: 'True or False: Basketball is the #1 sport in China.', type: 'tf', ans: true, fb: 'TRUE! American basketball became massively popular in China, even surpassing soccer in many areas! 🏀' },
+        { q: '🏙️ What percentage of South Koreans live in urban areas?', type: 'mc', opts: ['50%', '65%', '75%', '83%'], ans: 3, fb: '83%! South Korea is one of the most urbanized countries on Earth. Seoul alone has over 10 million residents! 🏙️' },
+        { q: 'Which Japanese art form — a unique style of animation — is now famous worldwide?', type: 'mc', opts: ['Manga', 'Kabuki', 'Anime', 'Origami'], ans: 2, fb: 'Anime! Japan\'s distinctive animation style has conquered the globe — from Dragon Ball to Studio Ghibli! 🎌✨' }
+      ]}
+    ]
+  }
+};
+
+// ============ BOSS QUIZ DATA (30 questions) ============
+const BOSS_QS = [
+  { type:'mc', q:'How many countries are in East Asia?', opts:['4','5','6','7'], ans:2, fb:'6 countries: China, Japan, Mongolia, North Korea, South Korea, Taiwan!' },
+  { type:'mc', q:'What is the capital of Japan?', opts:['Osaka','Seoul','Tokyo','Beijing'], ans:2, fb:'Tokyo! Home to a whopping 32 million people! 🏙️' },
+  { type:'tf', q:'Taiwan is officially recognized as independent by most countries.', ans:false, fb:'FALSE! Taiwan is a "de facto" country — it acts independent but isn\'t officially recognized by many.' },
+  { type:'mc', q:'Which river is the longest in all of Asia?', opts:['Yellow River','Yangtze River','Tone River','Shinano River'], ans:1, fb:'The Yangtze River is the longest in both China AND all of Asia!' },
+  { type:'fill', q:'The "Cradle of Chinese Civilization" is the _____ River.', ans:'yellow', hint:'Its color!', fb:'Yellow River (Huang He)! Early Chinese civilization was born along its banks! 🏺' },
+  { type:'mc', q:'Japan\'s islands were formed by what natural process?', opts:['Glaciers melting','Volcanic eruption','Earthquake lifting','Flooding'], ans:1, fb:'Volcanic eruptions! That\'s why Japan still shakes — it sits on very active geology! 🌋' },
+  { type:'tf', q:'The Plateau of Tibet is the largest and highest plateau in the world.', ans:true, fb:'TRUE! Called "The Roof of the World" — the highest plateau on Earth! 🏔️' },
+  { type:'mc', q:'Which Chinese invention helps sailors navigate at sea?', opts:['Gunpowder','Printing','Magnetic Compass','Papermaking'], ans:2, fb:'The Magnetic Compass changed navigation forever! ⛵🧭' },
+  { type:'mc', q:'Who founded Confucianism?', opts:['Laozi','Buddha','Confucius','Emperor Qin'], ans:2, fb:'Confucius! He emphasized family values and that a ruler should lead like a family head. 👨‍👩‍👧‍👦' },
+  { type:'fill', q:'China started building the Great Wall about _____ years ago.', ans:'2200', hint:'About 2,000 to 2,500', fb:'About 2,200 years ago! It stretches 21,196 km — the longest man-made structure ever! 🧱' },
+  { type:'mc', q:'What is the #1 sport in China?', opts:['Soccer','Baseball','Basketball','Taekwondo'], ans:2, fb:'Basketball! American basketball is the most popular sport in China! 🏀' },
+  { type:'tf', q:'83% of South Koreans live in rural (countryside) areas.', ans:false, fb:'FALSE! 83% of South Koreans live in URBAN (city) areas — it\'s one of the world\'s most urbanized countries!' },
+  { type:'mc', q:'Which desert spans both Mongolia and China?', opts:['Sahara','Taklamakan','Arabian','Gobi'], ans:3, fb:'The Gobi Desert! It has HOT summers and FREEZING winters — extreme! 🏜️❄️' },
+  { type:'mc', q:'Daoism teaches people to live in harmony with what?', opts:['The Emperor','Technology','Nature','Their family'], ans:2, fb:'Nature! Laozi founded Daoism — the idea that we should flow with the natural world. 🌿' },
+  { type:'tf', q:'Buddhism came into China from India.', ans:true, fb:'TRUE! Buddhism spread from India into China and eventually throughout all of East Asia. 🙏' },
+  { type:'fill', q:'Japan is an example of an _____ — a chain of islands.', ans:'archipelago', hint:'Starts with "arch"', fb:'Archipelago! Japan has 4 main islands: Hokkaido, Honshu, Shikoku, and Kyushu! 🏝️' },
+  { type:'mc', q:'Which dynasty is known for the Silk Road trade?', opts:['Xia Dynasty','Qin Dynasty','Han Dynasty','Ming Dynasty'], ans:2, fb:'Han Dynasty! They traded silk, tea, spices & paper along the Silk Road all the way to the Mediterranean! 🐫' },
+  { type:'mc', q:'Tokyo forms a "megalopolis" with which other Japanese cities?', opts:['Kyoto, Nara, Hiroshima','Osaka, Nagoya, Yokohama','Sapporo, Kobe, Nagoya','Osaka, Kyoto, Hiroshima'], ans:1, fb:'Osaka, Nagoya & Yokohama! A megalopolis is a huge cluster of cities with an enormous combined population! 🌆' },
+  { type:'tf', q:'China is the world\'s largest PRODUCER of coal.', ans:true, fb:'TRUE! China produces more coal than any other country on Earth — and has huge oil & gas reserves too! ⛏️' },
+  { type:'mc', q:'A trade SURPLUS means a country\'s _____ are higher than its imports.', opts:['Debts','Exports','Taxes','Resources'], ans:1, fb:'Exports! When you sell more than you buy from other countries, you have a trade surplus. 📈' },
+  { type:'mc', q:'What unique natural resource is Japan known for producing?', opts:['Rubies','Cultured Pearls','Diamonds','Sapphires'], ans:1, fb:'Cultured Pearls! Japan is world-famous for beautiful pearls ranging from white to silver and pink! 🦪✨' },
+  { type:'fill', q:'_____ founded the belief system called Daoism.', ans:'laozi', hint:'Ancient Chinese philosopher', fb:'Laozi! He taught that living in harmony with nature brings peace and balance. 🌿☯️' },
+  { type:'mc', q:'What percentage of China\'s population now lives in cities?', opts:['About 25%','About 35%','Nearly 50%','Over 75%'], ans:2, fb:'Nearly half (50%) of China\'s population lives in cities today — a huge change from its farming past! 🏙️' },
+  { type:'tf', q:'Mount Fuji is China\'s most famous mountain.', ans:false, fb:'FALSE! Mount Fuji is JAPAN\'s most famous mountain — a beautiful volcanic peak you can actually climb! 🗻🇯🇵' },
+  { type:'mc', q:'What language do people in South Korea speak?', opts:['Mandarin Chinese','Japanese','Khalkha Mongolian','Korean'], ans:3, fb:'Korean! The Korean language is spoken in both North and South Korea. 🗣️🇰🇷' },
+  { type:'mc', q:'Which is a current challenge facing East Asia?', opts:['Too much clean air','No cities','Air pollution & income gaps','Too many farmers'], ans:2, fb:'Air pollution and income gaps between urban and rural areas are serious modern challenges for East Asia. ⚠️' },
+  { type:'fill', q:'A _____ is a giant ocean wave caused by an underwater earthquake.', ans:'tsunami', hint:'Japanese word used worldwide', fb:'Tsunami! Japan faces this risk often because of its massive earthquake activity. 🌊😱' },
+  { type:'mc', q:'The Silk Road trade sent Chinese goods as far as the:', opts:['North Pole','Americas','Mediterranean','Antarctica'], ans:2, fb:'The Mediterranean! Chinese silk, tea, spices & porcelain traveled thousands of miles to Mediterranean traders! 🗺️' },
+  { type:'tf', q:'Confucianism, Daoism, and Buddhism are all practiced in China.', ans:true, fb:'TRUE! All three belief systems have deeply shaped Chinese culture, philosophy, and daily life for thousands of years! ☯️🙏' },
+  { type:'mc', q:'Which country\'s capital is Ulaanbaatar?', opts:['China','North Korea','South Korea','Mongolia'], ans:3, fb:'Mongolia! Ulaanbaatar (sometimes spelled Ulan Bator) is the capital — and one of the world\'s coldest! 🥶🇲🇳' }
+];
+
+// ============ BUILD WORLD MAP ============
+function buildMap() {
+  const grid = document.getElementById('locations-grid');
+  grid.innerHTML = '';
+  LOCATIONS.forEach((loc, i) => {
+    const isLocked = loc.id === 'boss' && completedLocations.size < 5;
+    const isDone = completedLocations.has(loc.id);
+    const div = document.createElement('div');
+    div.className = 'location-card' + (isLocked ? ' locked' : '') + (isDone ? ' completed' : '');
+    div.style.cssText = `--card-color:${loc.color};--card-glow:${loc.glow};--delay:${i*0.3}s`;
+    div.innerHTML = `
+      ${isLocked ? '<span class="lock-icon">🔒</span>' : ''}
+      <span class="loc-emoji" style="--delay:${i*0.4}s">${loc.emoji}</span>
+      <div class="loc-name">${loc.name}</div>
+      <div class="loc-desc">${isLocked ? '🔒 Complete all 5 zones first!' : loc.desc}</div>
+    `;
+    if (!isLocked) div.addEventListener('click', () => openRoom(loc.id));
+    grid.appendChild(div);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = 5; // 5 learning zones
+  const done = Math.min(completedLocations.size, 5);
+  document.getElementById('main-progress').style.width = (done/total*100) + '%';
+}
+
+// ============ OPEN ROOM ============
+function openRoom(id) {
+  if (id === 'boss') { openBossQuiz(); return; }
+  currentLocationId = id;
+  const loc = LOCATIONS.find(l => l.id === id);
+  const content = ROOM_CONTENT[id];
+
+  document.getElementById('room-title').textContent = content.title;
+  document.getElementById('room-xp').textContent = `⚡ ${xp} XP`;
+  document.getElementById('room-bg').style.background = loc.bgGradient;
+  document.getElementById('room-bg').style.setProperty('--room-bg', loc.bgGradient);
+
+  buildRoomContent(id, content, loc);
+
+  const room = document.getElementById('adventure-room');
+  room.style.display = 'flex';
+  requestAnimationFrame(() => room.classList.add('open'));
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRoom() {
+  const room = document.getElementById('adventure-room');
+  room.classList.remove('open');
+  setTimeout(() => { room.style.display = 'none'; }, 400);
+  document.body.style.overflow = '';
+  buildMap();
+}
+
+function buildRoomContent(id, content, loc) {
+  const body = document.getElementById('room-body');
+  let html = '';
+
+  content.scenes.forEach((scene, si) => {
+    if (scene.type === 'speech') {
+      html += `<div class="speech-row ${scene.flip ? 'flip' : ''}">
+        <div class="char-avatar">${scene.char}</div>
+        <div class="speech-bubble ${scene.style || ''}">
+          <div class="char-name">${scene.name}</div>
+          ${scene.text}
+        </div>
+      </div>`;
+    }
+    else if (scene.type === 'facts') {
+      html += `<div class="fact-grid">`;
+      scene.items.forEach(it => {
+        html += `<div class="fact-tile">
+          <span class="ft-icon">${it.icon}</span>
+          <div class="ft-title">${it.title}</div>
+          <div class="ft-body">${it.body}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+    else if (scene.type === 'quiz') {
+      html += buildMiniQuiz(id, scene.questions, si);
+    }
+  });
+
+  // Completion section
+  html += `<div class="section-complete" id="complete-${id}">
+    <div class="complete-circle">🌟</div>
+    <h2>Zone Complete!</h2>
+    <p>Awesome work, explorer! You've mastered this zone and earned XP!<br>Head back to the map to continue your adventure.</p>
+    <button class="go-map-btn" onclick="closeRoom()">🗺️ Back to Map</button>
+  </div>`;
+
+  body.innerHTML = html;
+  attachMiniQuizEvents(id, content);
+}
+
+function buildMiniQuiz(locId, questions, sceneIdx) {
+  let html = `<div class="mini-quiz" id="mq-${locId}-${sceneIdx}">
+    <h3>🎮 Quick Challenge!</h3>`;
+
+  questions.forEach((q, qi) => {
+    html += `<div class="mq-question" id="mqq-${locId}-${sceneIdx}-${qi}">
+      <div class="mq-q-text">${qi+1}. ${q.q}</div>`;
+
+    if (q.type === 'mc') {
+      html += `<div class="mq-options">`;
+      const icons = ['🅰️','🅱️','🆑','🅳'];
+      q.opts.forEach((o, oi) => {
+        html += `<button class="mq-opt" data-loc="${locId}" data-si="${sceneIdx}" data-qi="${qi}" data-oi="${oi}">
+          <span class="opt-icon">${icons[oi]}</span>${o}
+        </button>`;
+      });
+      html += `</div>`;
+    }
+    else if (q.type === 'tf') {
+      html += `<div class="tf-row">
+        <button class="mq-tf" data-loc="${locId}" data-si="${sceneIdx}" data-qi="${qi}" data-val="true">✅ True</button>
+        <button class="mq-tf" data-loc="${locId}" data-si="${sceneIdx}" data-qi="${qi}" data-val="false">❌ False</button>
+      </div>`;
+    }
+    else if (q.type === 'fill') {
+      html += `<div class="fill-row">
+        <input class="mq-fill" id="mf-${locId}-${sceneIdx}-${qi}" placeholder="Type your answer... (hint: ${q.hint})" onkeydown="if(event.key==='Enter')submitFill('${locId}',${sceneIdx},${qi})">
+        <button class="mq-submit" onclick="submitFill('${locId}',${sceneIdx},${qi})">Go!</button>
+      </div>`;
+    }
+
+    html += `<div class="q-feedback" id="fb-${locId}-${sceneIdx}-${qi}"></div></div>`;
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+// ============ MINI QUIZ EVENTS ============
+const quizAnswered = {}; // track answered state
+const sectionDone = {}; // track if section fully answered
+
+function attachMiniQuizEvents(locId, content) {
+  // MC
+  document.querySelectorAll('.mq-opt').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const { loc, si, qi, oi } = this.dataset;
+      const key = `${loc}-${si}-${qi}`;
+      if (quizAnswered[key]) return;
+      const scene = content.scenes.find((s,i) => s.type === 'quiz' && String(i) === si);
+      if (!scene) return;
+      const q = scene.questions[qi];
+      quizAnswered[key] = true;
+      const correct = parseInt(oi) === q.ans;
+      document.querySelectorAll(`.mq-opt[data-loc="${loc}"][data-si="${si}"][data-qi="${qi}"]`).forEach((b,bi) => {
+        b.disabled = true;
+        if (bi === q.ans) b.classList.add('correct');
+      });
+      if (!correct) this.classList.add('wrong');
+      if (correct) { addXP(10); showXPToast('+10 XP! 🌟'); }
+      showMQFeedback(loc, si, qi, correct, q.fb);
+      checkSectionDone(locId, content);
+    });
+  });
+
+  // TF
+  document.querySelectorAll('.mq-tf').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const { loc, si, qi, val } = this.dataset;
+      const key = `${loc}-${si}-${qi}`;
+      if (quizAnswered[key]) return;
+      const scene = content.scenes.find((s,i) => s.type === 'quiz' && String(i) === si);
+      if (!scene) return;
+      const q = scene.questions[qi];
+      quizAnswered[key] = true;
+      const userAns = val === 'true';
+      const correct = userAns === q.ans;
+      document.querySelectorAll(`.mq-tf[data-loc="${loc}"][data-si="${si}"][data-qi="${qi}"]`).forEach(b => {
+        b.disabled = true;
+        if ((b.dataset.val === 'true') === q.ans) b.classList.add('correct');
+      });
+      if (!correct) this.classList.add('wrong');
+      if (correct) { addXP(10); showXPToast('+10 XP! 🌟'); }
+      showMQFeedback(loc, si, qi, correct, q.fb);
+      checkSectionDone(locId, content);
+    });
+  });
+}
+
+function submitFill(loc, si, qi) {
+  const key = `${loc}-${si}-${qi}`;
+  if (quizAnswered[key]) return;
+  const input = document.getElementById(`mf-${loc}-${si}-${qi}`);
+  if (!input) return;
+  const content = ROOM_CONTENT[loc];
+  const scene = content.scenes.find((s,i) => s.type === 'quiz' && String(i) === si);
+  if (!scene) return;
+  const q = scene.questions[qi];
+  const userAns = input.value.trim().toLowerCase();
+  const correct = q.ans.split('/').map(a=>a.trim()).includes(userAns);
+  quizAnswered[key] = true;
+  input.disabled = true;
+  input.classList.add(correct ? 'correct' : 'wrong');
+  document.querySelector(`button[onclick="submitFill('${loc}',${si},${qi})"]`).disabled = true;
+  if (correct) { addXP(10); showXPToast('+10 XP! 🌟'); }
+  showMQFeedback(loc, si, qi, correct, q.fb + (correct ? '' : ` ➡️ Answer: <strong>${q.ans}</strong>`));
+  checkSectionDone(loc, content);
+}
+
+function showMQFeedback(loc, si, qi, correct, fb) {
+  const el = document.getElementById(`fb-${loc}-${si}-${qi}`);
+  if (!el) return;
+  el.className = `q-feedback show ${correct ? 'ok' : 'no'}`;
+  el.innerHTML = (correct ? '✅ ' : '❌ ') + fb;
+}
+
+function checkSectionDone(locId, content) {
+  const allQuizScenes = content.scenes.filter((s,i) => s.type === 'quiz').map((s,_,arr) => {
+    const sceneIdx = content.scenes.indexOf(s);
+    return { sceneIdx, questions: s.questions };
+  });
+  let allDone = true;
+  allQuizScenes.forEach(({ sceneIdx, questions }) => {
+    questions.forEach((q, qi) => {
+      if (!quizAnswered[`${locId}-${sceneIdx}-${qi}`]) allDone = false;
+    });
+  });
+  if (allDone && !completedLocations.has(locId)) {
+    completedLocations.add(locId);
+    addXP(50);
+    showXPToast('+50 XP! Zone Complete! 🎉');
+    setTimeout(() => {
+      const complete = document.getElementById(`complete-${locId}`);
+      if (complete) {
+        complete.classList.add('show');
+        complete.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        launchConfetti();
+      }
+    }, 600);
+    // Check if all 5 done — unlock boss
+    if (completedLocations.size >= 5) {
+      setTimeout(() => showGuide("🎊 ALL ZONES COMPLETE! The Dragon Boss Lair is now UNLOCKED! Head to the map and face the final challenge! 🐲"), 1500);
+    }
+  }
+}
+
+// ============ XP ============
+function addXP(amount) {
+  xp += amount;
+  const el = document.getElementById('room-xp');
+  if (el) el.textContent = `⚡ ${xp} XP`;
+}
+
+function showXPToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'xp-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 1900);
+}
+
+// ============ CONFETTI ============
+function launchConfetti() {
+  const colors = ['#FFB703','#E63946','#2EC4B6','#FF6B9D','#7B2D8B','#2DC653','#FB8500'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.cssText = `
+      left:${Math.random()*100}vw;
+      top:-10px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      width:${6+Math.random()*10}px;
+      height:${6+Math.random()*10}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      --dur:${2+Math.random()*2}s;
+      animation-delay:${Math.random()*0.5}s;
+    `;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4500);
+  }
+}
+
+// ============ GUIDE POPUP ============
+function showGuide(msg) {
+  document.getElementById('guide-msg').innerHTML = msg;
+  document.getElementById('guide-popup').classList.add('show');
+}
+function closeGuide() {
+  document.getElementById('guide-popup').classList.remove('show');
+}
+
+// ============ SPLASH ============
+function startAdventure() {
+  document.getElementById('splash').classList.add('out');
+  setTimeout(() => {
+    document.getElementById('splash').style.display = 'none';
+    buildMap();
+    setTimeout(() => showGuide('Welcome to East Asia! 🌏 Start anywhere you like — explore all 5 zones to unlock the Dragon Boss Quiz! I\'ll be here if you need me! 🐉'), 800);
+  }, 800);
+}
+
+// ============ BOSS QUIZ ============
+let bossQ = 0, bossScore = 0, bossLives = 3, bossAnswered = false;
+let bossQuestions = [];
+
+function openBossQuiz() {
+  document.getElementById('boss-quiz').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  initBossQuiz();
+}
+
+function initBossQuiz() {
+  bossQ = 0; bossScore = 0; bossLives = 3; bossAnswered = false;
+  bossQuestions = shuffle([...BOSS_QS]);
+  document.getElementById('boss-results').classList.remove('show');
+  document.getElementById('boss-question-area').style.display = 'block';
+  document.getElementById('boss-dragon').style.display = 'block';
+  document.getElementById('boss-hp-bar').style.display = 'block';
+  updateBossUI();
+  renderBossQ();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function updateBossUI() {
+  document.getElementById('boss-qnum').textContent = `Q ${bossQ+1} / ${bossQuestions.length}`;
+  const hearts = ['❤️','❤️','❤️'].slice(0, bossLives).join('') + ['🖤','🖤','🖤'].slice(0, 3-bossLives).join('');
+  document.getElementById('boss-hearts').innerHTML = hearts;
+  const hp = ((bossQuestions.length - bossQ) / bossQuestions.length) * 100;
+  document.getElementById('boss-hp-fill').style.width = hp + '%';
+}
+
+function renderBossQ() {
+  if (bossQ >= bossQuestions.length || bossLives <= 0) { showBossResults(); return; }
+  bossAnswered = false;
+  const q = bossQuestions[bossQ];
+  updateBossUI();
+  const area = document.getElementById('boss-question-area');
+
+  const typeLabel = { mc:'Multiple Choice', tf:'True or False', fill:'Fill in the Blank' }[q.type];
+  let html = `<div class="boss-question">
+    <div class="boss-q-type">${typeLabel}</div>
+    <div class="boss-q-text">${q.q}</div>
+  </div>`;
+
+  if (q.type === 'mc') {
+    const letters = ['A','B','C','D'];
+    html += `<div class="boss-opts">` + q.opts.map((o,i) =>
+      `<button class="boss-opt" data-oi="${i}" onclick="checkBossMC(this,${i},${q.ans})">
+        <span class="boss-opt-letter">${letters[i]}</span>${o}
+      </button>`).join('') + `</div>`;
+  }
+  else if (q.type === 'tf') {
+    html += `<div class="boss-tf-row">
+      <button class="boss-tf" onclick="checkBossTF(this,true,${q.ans})">✅ True</button>
+      <button class="boss-tf" onclick="checkBossTF(this,false,${q.ans})">❌ False</button>
+    </div>`;
+  }
+  else if (q.type === 'fill') {
+    html += `<div class="boss-fill-row">
+      <input class="boss-fill" id="boss-fill-input" placeholder="Type answer... (hint: ${q.hint})" onkeydown="if(event.key==='Enter')checkBossFill(${bossQ})">
+      <button class="boss-submit" onclick="checkBossFill(${bossQ})">Attack! ⚔️</button>
+    </div>`;
+  }
+
+  html += `<div class="boss-feedback" id="boss-fb"></div>
+    <button class="boss-next-btn" id="boss-next" onclick="nextBossQ()">Next Attack ⚔️</button>`;
+
+  area.innerHTML = html;
+}
+
+function checkBossMC(btn, oi, ans) {
+  if (bossAnswered) return;
+  bossAnswered = true;
+  document.querySelectorAll('.boss-opt').forEach((b,i) => {
+    b.disabled = true;
+    if (i === ans) b.classList.add('correct');
+  });
+  const correct = oi === ans;
+  if (!correct) { btn.classList.add('wrong'); bossLives--; hurtDragon(); }
+  else { bossScore++; hitDragon(); }
+  showBossFb(correct, bossQuestions[bossQ].fb);
+  updateBossUI();
+  document.getElementById('boss-next').classList.add('show');
+}
+
+function checkBossTF(btn, val, ans) {
+  if (bossAnswered) return;
+  bossAnswered = true;
+  document.querySelectorAll('.boss-tf').forEach(b => { b.disabled = true; });
+  const correct = val === ans;
+  if (ans === true) document.querySelectorAll('.boss-tf')[0].classList.add('correct');
+  else document.querySelectorAll('.boss-tf')[1].classList.add('correct');
+  if (!correct) { btn.classList.add('wrong'); bossLives--; hurtDragon(); }
+  else { bossScore++; hitDragon(); }
+  showBossFb(correct, bossQuestions[bossQ].fb);
+  updateBossUI();
+  document.getElementById('boss-next').classList.add('show');
+}
+
+function checkBossFill(qIdx) {
+  if (bossAnswered) return;
+  const input = document.getElementById('boss-fill-input');
+  if (!input) return;
+  bossAnswered = true;
+  input.disabled = true;
+  document.querySelector('.boss-submit').disabled = true;
+  const userAns = input.value.trim().toLowerCase();
+  const q = bossQuestions[qIdx];
+  const correct = q.ans.split('/').map(a=>a.trim()).includes(userAns);
+  input.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) { bossLives--; hurtDragon(); }
+  else { bossScore++; hitDragon(); }
+  showBossFb(correct, q.fb + (correct ? '' : ` Answer: <strong>${q.ans}</strong>`));
+  updateBossUI();
+  document.getElementById('boss-next').classList.add('show');
+}
+
+function hitDragon() {
+  const d = document.getElementById('boss-dragon');
+  d.classList.add('hurt');
+  setTimeout(() => d.classList.remove('hurt'), 500);
+}
+function hurtDragon() {
+  document.getElementById('boss-dragon').style.filter = 'drop-shadow(0 0 30px rgba(230,57,70,0.9))';
+  setTimeout(() => document.getElementById('boss-dragon').style.filter = 'drop-shadow(0 0 30px rgba(230,57,70,0.7))', 400);
+}
+
+function showBossFb(correct, fb) {
+  const el = document.getElementById('boss-fb');
+  el.className = `boss-feedback show ${correct ? 'ok' : 'no'}`;
+  el.innerHTML = (correct ? '⚔️ Hit! ' : '🛡️ Blocked! ') + fb;
+}
+
+function nextBossQ() {
+  bossQ++;
+  if (bossQ >= bossQuestions.length || bossLives <= 0) showBossResults();
+  else renderBossQ();
+}
+
+function showBossResults() {
+  document.getElementById('boss-question-area').style.display = 'none';
+  document.getElementById('boss-dragon').style.display = 'none';
+  document.getElementById('boss-hp-bar').style.display = 'none';
+  const pct = Math.round(bossScore / bossQuestions.length * 100);
+  const results = document.getElementById('boss-results');
+  results.classList.add('show');
+  document.getElementById('boss-score-big').textContent = `${bossScore}/${bossQuestions.length}`;
+
+  let trophy, title, msg;
+  if (pct >= 90) { trophy='🏆'; title='DRAGON SLAYER!'; msg='Perfect mastery of East Asia! You\'re a geography LEGEND! 🌟'; }
+  else if (pct >= 80) { trophy='🥇'; title='East Asia Expert!'; msg='Excellent work! You clearly know your stuff! 🎉'; }
+  else if (pct >= 70) { trophy='🥈'; title='Well Done!'; msg='Great effort! Review a few zones and try again! 💪'; }
+  else if (pct >= 60) { trophy='🥉'; title='You Passed!'; msg='You survived the dragon! Go back to the zones for more practice! 📚'; }
+  else { trophy='💪'; title='Keep Going!'; msg='The dragon wins this round — but revisit the zones and come back stronger! 🐉'; }
+
+  document.getElementById('trophy-emoji').textContent = trophy;
+  document.getElementById('boss-result-title').textContent = title;
+  document.getElementById('boss-grade-msg').textContent = `${pct}% · ${msg}`;
+
+  if (pct >= 70) launchConfetti();
+}
+
+// Close boss quiz
+document.getElementById('boss-quiz').addEventListener('click', function(e) {
+  if (e.target === this) { this.classList.remove('open'); document.body.style.overflow = ''; buildMap(); }
+});
+</script>
+</body>
+</html>
